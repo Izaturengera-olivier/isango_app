@@ -1,37 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:isango_app/core/constants/app_routes.dart';
 import 'package:isango_app/core/services/auth_service.dart';
+import 'package:isango_app/core/theme/app_colors.dart';
 import 'package:isango_app/core/theme/app_text_styles.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   String? _errorMessage;
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _signup() async {
+  Future<void> _login() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -42,25 +38,24 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     try {
-      final success = await _authService.signup(
-        _nameController.text.trim(),
+      final success = await _authService.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
       if (success) {
-        // Navigate to home screen on successful signup
+        // Navigate to home screen on successful login
         if (mounted) {
           Navigator.pushReplacementNamed(context, AppRoutes.home);
         }
       } else {
         setState(() {
-          _errorMessage = 'Email already exists. Please use a different email.';
+          _errorMessage = 'Invalid email or password';
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Signup failed. Please try again.';
+        _errorMessage = 'Login failed. Please try again.';
       });
     } finally {
       if (mounted) {
@@ -83,37 +78,34 @@ class _SignupScreenState extends State<SignupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 60),
+                  // Isango Wordmark
                   Text(
-                    'Create Account',
-                    style: AppTextStyles.display,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Join the Isango community',
-                    style: AppTextStyles.bodyMuted,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Full Name',
-                      hintText: 'Enter your full name',
-                      prefixIcon: Icon(Icons.person_outline),
+                    'ISANGO',
+                    style: AppTextStyles.display.copyWith(
+                      color: AppColors.logisticsNavy,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2.0,
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your full name';
-                      }
-                      if (value.length < 2) {
-                        return 'Name must be at least 2 characters';
-                      }
-                      return null;
-                    },
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Sign In',
+                    style: AppTextStyles.headline.copyWith(
+                      color: AppColors.nearBlackInk,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Access campus events and activities in your community',
+                    style: AppTextStyles.bodyMuted.copyWith(
+                      color: AppColors.mutedOperationalInk,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -122,6 +114,14 @@ class _SignupScreenState extends State<SignupScreen> {
                       hintText: 'Enter your email',
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
+                    onChanged: (value) {
+                      // Inline email validation
+                      if (value.isNotEmpty) {
+                        setState(() {
+                          _errorMessage = null;
+                        });
+                      }
+                    },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
@@ -161,35 +161,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword,
-                    decoration: InputDecoration(
-                      labelText: 'Confirm Password',
-                      hintText: 'Confirm your password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
-                    },
-                  ),
+                  const SizedBox(height: 8),
                   if (_errorMessage != null)
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -216,13 +188,31 @@ class _SignupScreenState extends State<SignupScreen> {
                         ],
                       ),
                     ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        // TODO: Implement forgot password
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: AppTextStyles.label.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _signup,
+                    onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: _isLoading 
+                          ? AppColors.mutedOperationalInk 
+                          : AppColors.logisticsNavy,
                       foregroundColor: Colors.white,
+                      disabledBackgroundColor: AppColors.mutedOperationalInk,
                     ),
                     child: _isLoading
                         ? const SizedBox(
@@ -233,22 +223,22 @@ class _SignupScreenState extends State<SignupScreen> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text('Create Account'),
+                        : const Text('Sign In'),
                   ),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account? ',
+                        "Don't have an account? ",
                         style: AppTextStyles.bodyMuted,
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, AppRoutes.login);
+                          Navigator.pushNamed(context, AppRoutes.signUp);
                         },
                         child: Text(
-                          'Sign In',
+                          'Sign Up',
                           style: AppTextStyles.label.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                           ),
