@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isango_app/screens/auth/sign_in_screen.dart';
 import 'package:isango_app/screens/auth/signup_screen.dart';
+import 'package:isango_app/screens/auth/email_verification_screen.dart';
 import 'package:isango_app/screens/home/home_screen.dart';
 import 'package:isango_app/screens/saved/saved_screen.dart';
 import 'package:isango_app/screens/settings/settings_screen.dart';
@@ -22,6 +23,11 @@ class IsangoApp extends StatelessWidget {
       routes: {
         AppRoutes.login: (context) => const SignInScreen(),
         AppRoutes.signUp: (context) => const SignupScreen(),
+        AppRoutes.verifyEmail: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
+          final email = args?['email'] ?? 'user@example.com';
+          return EmailVerificationScreen(email: email);
+        },
         AppRoutes.home: (context) => const HomeScreen(),
         AppRoutes.saved:(context) => const SavedScreen(),
         AppRoutes.submitEvent:(context) => const SubmitScreen(),

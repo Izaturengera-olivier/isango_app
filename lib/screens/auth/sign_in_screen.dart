@@ -44,9 +44,13 @@ class _SignInScreenState extends State<SignInScreen> {
       );
 
       if (success) {
-        // Navigate to home screen on successful login
+        // Navigate to email verification screen on successful login
         if (mounted) {
-          Navigator.pushReplacementNamed(context, AppRoutes.home);
+          Navigator.pushReplacementNamed(
+            context, 
+            AppRoutes.verifyEmail,
+            arguments: {'email': _emailController.text.trim()},
+          );
         }
       } else {
         setState(() {
